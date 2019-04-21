@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  i am A:
+  <input type="text" id="a">
+  <p>i am B</p>
+  <div id="b">
+
+  </div>
+  <p>i am C</p>
+  <div id="c">
+
+  </div>
+  <script>
+    // subject
+    function Subject() {
+      this.observers = []
+    }
+    Subject.prototype.Add = function (observer) {
+      this.observers.push(observer)
+    }
+    Subject.prototype.Remove = function (observer) {
+      this.observers.splice(this.observers.indexOf(observer), 1)
+    }
+    Subject.prototype.Notify = function (context) {
+      this.observers.forEach(function (observer) {
+        observer.update(context)
+      })
+    }
+    // observer
+    function Observer() {
+      this.update = function () {
+        // observer需要具体实现自己的update方法
+      }
+    }
+
+    function extendObserver(obj) {
+      var observerInstance = new Observer()
+      for (var key in obj) {
+        // 这样可以保证传入的obj中的update方法可以覆盖Observer中的update方法
+        observerInstance[key] = obj[key]
+      }
+      return observerInstance
+    }
+    // demo
+    var elA = document.getElementById('a')
+    var elB = document.getElementById('b')
+    var elC = document.getElementById('c')
+    // 实例化 subject和observer对象
+    var subjectA = new Subject()
+    elB.update = function (context) {
+      elB.innerHTML = context
+    }
+    elC.update = function (context) {
+      elC.innerHTML = 'hello:' + context
+    }
+    var observerB = extendObserver(elB)
+    var observerC = extendObserver(elC)
+    // 注册监听
+    subjectA.Add(observerB)
+    subjectA.Add(observerC)
+    elA.onchange = function () {
+      subjectA.Notify(elA.value)
+    }
+  </script>
+
+</body>
+
+</html>
