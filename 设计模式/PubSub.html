@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Pub/Sub pattern</title>
+
+</head>
+
+<body>
+  <input type="text" onchange="getchange(this.value)" placeholder="输入文本">
+  <div>
+    i am subscriber1:
+    <span id="subscriber1"></span>
+  </div>
+  <div>
+    i am subscriber2:
+    <span id="subscriber2"></span>
+  </div>
+  <button onclick="unsubscribe()">unsubscribe</button>
+  <p style="font-size: 12px;"> 停止订阅后输入框改变将不再监听</p>
+  <script>
+    var eventList = {}
+    var eventChannel = {
+      publish: function (eventName) {
+        // 获取除了eventName之外的参数
+        var params = Array.prototype.slice.call(arguments, 1, arguments.length)
+        eventList[eventName] && eventList[eventName].forEach(function (callback) {
+          callback.apply(null, params)
+        })
+      },
+      subscribe: function (eventName, callback) {
+        if (eventList[eventName]) {
+          eventList[eventName].push(callback)
+        } else {
+          eventList[eventName] = [callback]
+        }
+        return {
+          eventName: eventName,
+          index: eventList.length - 1
+        }
+      },
+      unsubscribe: function (subscriber) {
+        if (subscriber) {
+          eventList[subscriber.eventName].splice(subscriber.index, 1)
+          subscriber = null
+        }
+      }
+    }
+
+    function getchange(e) {
+      eventChannel.publish('sub', e)
+    }
+
+    var subscriber1 = eventChannel.subscribe('sub', function (value) {
+      document.getElementById('subscriber1').innerHTML = value
+    })
+    var subscriber2 = eventChannel.subscribe('sub', function (value) {
+      document.getElementById('subscriber2').innerHTML = value + ' hey'
+    })
+
+    function unsubscribe() {
+      eventChannel.unsubscribe(subscriber1)
+      eventChannel.unsubscribe(subscriber2)
+    }
+  </script>
+</body>
+
+</html>
